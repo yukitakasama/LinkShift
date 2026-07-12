@@ -1,15 +1,20 @@
 # PyInstaller 打包配置
 # 用法：pyinstaller build.spec
-from PyInstaller.utils.hooks import collect_all
+import importlib
 
 datas = [("app_icon.ico", ".")]
 binaries = []
-hiddenimports = [
-    "PySide6.QtCharts",
-    "PySide6.QtCore",
-    "PySide6.QtWidgets",
-    "PySide6.QtGui",
-]
+
+# 根据当前环境中可用的工具包选择 hiddenimports：
+#   64 位（PySide6）或 32 位（PyQt5）。UI 通过 ui/qt_compat 自动适配。
+_hidden = []
+try:
+    importlib.import_module("PySide6")
+    _hidden = ["PySide6.QtCore", "PySide6.QtWidgets", "PySide6.QtGui"]
+except ImportError:
+    _hidden = ["PyQt5.QtCore", "PyQt5.QtWidgets", "PyQt5.QtGui"]
+
+hiddenimports = _hidden
 
 a = Analysis(
     ["main.py"],
@@ -28,7 +33,6 @@ pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
-    a.scripts,
     a.binaries,
     a.datas,
     [],

@@ -2,13 +2,11 @@
 
 import time
 
-from PySide6.QtCore import QThread, Signal, QObject, Qt
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel, QTextEdit,
-    QPushButton, QMessageBox,
+from .qt_compat import (
+    QThread, Signal, QObject, Qt, QDialog, QVBoxLayout, QHBoxLayout,
+    QProgressBar, QLabel, QTextEdit, QPushButton, QMessageBox,
 )
-from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
-from PySide6.QtGui import QPainter, QPen, QColor
+from .speed_chart import SpeedChart
 
 
 class _Worker(QThread):
@@ -58,8 +56,6 @@ def _fmt_speed(bps: float) -> str:
 
 
 class ProgressDialog(QDialog):
-    MAX_POINTS = 600
-
     def __init__(self, task, total_bytes=0, title="迁移进行中", parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
@@ -79,36 +75,8 @@ class ProgressDialog(QDialog):
         if not self._has_total:
             self.bar.setRange(0, 0)  # 不确定模式，直到拿到真实总量
 
-        # 速度曲线
-        self.series = QLineSeries()
-        self.series.setColor(QColor("#2d8cf0"))
-        self.pen = QPen(self.series.color())
-        self.pen.setWidth(2)
-        self.series.setPen(self.pen)
-
-        self.chart = QChart()
-        self.chart.addSeries(self.series)
-        self.chart.setTitle("实时传输速度 (MB/s)")
-        self.chart.setAnimationOptions(QChart.AnimationOption.NoAnimation)
-        self.chart.legend().hide()
-
-        self.axis_x = QValueAxis()
-        self.axis_x.setTitleText("时间 (s)")
-        self.axis_x.setLabelFormat("%.0f")
-        self.axis_x.setMin(0)
-        self.axis_x.setMax(10)
-        self.axis_y = QValueAxis()
-        self.axis_y.setTitleText("MB/s")
-        self.axis_y.setMin(0)
-        self.axis_y.setMax(10)
-        self.chart.addAxis(self.axis_x, Qt.AlignmentFlag.AlignBottom)
-        self.chart.addAxis(self.axis_y, Qt.AlignmentFlag.AlignLeft)
-        self.series.attachAxis(self.axis_x)
-        self.series.attachAxis(self.axis_y)
-
-        self.chart_view = QChartView(self.chart)
-        self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-        self.chart_view.setMinimumHeight(220)
+        # 速度曲线（自绘，兼容 PySide6 / PyQt5）
+        self.chart = SpeedChart()
 
         # 日志
         self.log_edit = QTextEdit()
@@ -129,7 +97,8 @@ class ProgressDialog(QDialog):
         h.addWidget(self.lbl_speed)
         h.addWidget(self.lbl_time)
         layout.addLayout(h)
-        layout.addWidget(self.chart_view)
+        layout.addWidget(QLabel("实时传输速度 (MB/s)"))
+        layout.addWidget(self.chart)
         layout.addWidget(QLabel("日志："))
         layout.addWidget(self.log_edit)
         btn_row = QHBoxLayout()
@@ -139,7 +108,6 @@ class ProgressDialog(QDialog):
         layout.addLayout(btn_row)
 
         self._start_time = 0
-        self._samples = []  # (t, mbps)
         self._cancelling = False
 
         self.worker = _Worker(task)
@@ -189,22 +157,7 @@ class ProgressDialog(QDialog):
         mbps = bps / (1024 * 1024)
         self.lbl_speed.setText(f"速度：{_fmt_speed(bps)}")
         self.lbl_time.setText(f"用时：{elapsed:.1f}s")
-        t = elapsed
-        self._samples.append((t, mbps))
-        if len(self._samples) > self.MAX_POINTS:
-            self._samples = self._samples[-self.MAX_POINTS:]
-        self._redraw_chart()
-
-    def _redraw_chart(self):
-        self.series.clear()
-        if not self._samples:
-            return
-        max_t = max(t for t, _ in self._samples)
-        max_v = max(v for _, v in self._samples)
-        for t, v in self._samples:
-            self.series.append(t, v)
-        self.axis_x.setMax(max(10, max_t * 1.1))
-        self.axis_y.setMax(max(10, max_v * 1.2))
+        self.chart.add_sample(elapsed, mbps)
 
     def _on_log(self, msg):
         self.log_edit.append(msg)

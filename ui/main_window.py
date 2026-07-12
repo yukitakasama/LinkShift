@@ -7,11 +7,10 @@
 
 import os
 
-from PySide6.QtWidgets import (
+from .qt_compat import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QLabel,
-    QLineEdit, QFileDialog, QMessageBox,     QAbstractItemView, QTabWidget,
+    QLineEdit, QFileDialog, QMessageBox, QAbstractItemView, QTabWidget, Qt,
 )
-from PySide6.QtCore import Qt
 
 from core import disk, symlink, migrator
 from .progress_dialog import ProgressDialog
