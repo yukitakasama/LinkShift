@@ -33,8 +33,6 @@ class MainWindow(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(tabs)
 
-        self._check_capability()
-
     # ---------------- 能力检测 ----------------
     def _check_capability(self):
         if not symlink.can_create_symlink():
@@ -54,8 +52,6 @@ class MainWindow(QWidget):
                 )
                 if ans == QMessageBox.StandardButton.Yes:
                     symlink.relaunch_as_admin()
-                    import sys
-                    sys.exit(0)
 
     # ================= 迁移页 =================
     def _build_migrate_tab(self) -> QWidget:
