@@ -59,4 +59,4 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" out/LinkShift-*.x86_64 --clobber
+        run: gh release upload "${{ github.ref_name }}" out/LinkShift-*-Linux-x86_64 --clobber
