@@ -1,0 +1,303 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global navigation menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "yukitakasama" [ref=e22] [cursor=pointer]:
+                  - /url: /yukitakasama
+                  - generic [ref=e23]: yukitakasama
+              - listitem [ref=e24]:
+                - link "LinkShift" [ref=e25] [cursor=pointer]:
+                  - /url: /yukitakasama/LinkShift
+                - button "Switch repository (alt shift r)" [ref=e26] [cursor=pointer]:
+                  - img [ref=e27]
+          - button "Search or jump to…" [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]:
+              - generic:
+                - img
+              - generic [ref=e33]:
+                - generic:
+                  - text: Type
+                  - generic: /
+                  - text: to search
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e38]:
+              - link "Chat with Copilot" [ref=e40] [cursor=pointer]:
+                - /url: /copilot
+                - img [ref=e41]
+              - button "Open Copilot…" [ref=e45] [cursor=pointer]:
+                - generic:
+                  - img
+            - button "Create new..." [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - generic [ref=e49]:
+              - link "All issues" [ref=e50] [cursor=pointer]:
+                - /url: /issues
+                - img [ref=e51]
+              - link "All pull requests" [ref=e54] [cursor=pointer]:
+                - /url: /pulls
+                - img [ref=e55]
+              - link "All repositories" [ref=e57] [cursor=pointer]:
+                - /url: /repos
+                - img [ref=e58]
+          - link "You have no unread notifications (g then n)" [ref=e60] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e61]
+          - button "Open user navigation menu" [ref=e64] [cursor=pointer]:
+            - img "User avatar" [ref=e65]
+      - heading "Repository navigation" [level=2] [ref=e66]
+      - navigation "Repository" [ref=e67]:
+        - list [ref=e68]:
+          - listitem [ref=e69]:
+            - link "Code" [ref=e70] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift
+              - generic [ref=e71]: Code
+          - listitem [ref=e72]:
+            - link "Issues" [ref=e73] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/issues
+              - generic [ref=e74]: Issues
+          - listitem [ref=e75]:
+            - link "Pull requests" [ref=e76] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/pulls
+              - generic [ref=e77]: Pull requests
+          - listitem [ref=e78]:
+            - link "Agents" [ref=e79] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/agents?author=yukitakasama
+              - generic [ref=e80]: Agents
+          - listitem [ref=e81]:
+            - link "Actions" [ref=e82] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/actions
+              - generic [ref=e83]: Actions
+          - listitem [ref=e84]:
+            - link "Projects" [ref=e85] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/projects
+              - generic [ref=e86]: Projects
+          - listitem [ref=e87]:
+            - link "Wiki" [ref=e88] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/wiki
+              - generic [ref=e89]: Wiki
+          - listitem [ref=e90]:
+            - link "Security and quality" [ref=e91] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/security
+              - generic [ref=e92]: Security and quality
+          - listitem [ref=e93]:
+            - link "Insights" [ref=e94] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/pulse
+              - generic [ref=e95]: Insights
+          - listitem [ref=e96]:
+            - link "Settings" [ref=e97] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/settings
+              - generic [ref=e98]: Settings
+  - main [ref=e102]:
+    - generic [ref=e302]:
+      - link "Releases" [ref=e304] [cursor=pointer]:
+        - /url: /yukitakasama/LinkShift/releases
+        - generic [ref=e305]:
+          - img [ref=e306]
+          - text: Releases
+      - heading "Edit v1.1 - 修复卡死 + 实时速度 + 取消按钮" [level=1] [ref=e309]:
+        - strong [ref=e310]: Edit v1.1 - 修复卡死 + 实时速度 + 取消按钮
+      - generic [ref=e311]:
+        - generic [ref=e313]:
+          - generic [ref=e314]:
+            - 'button "Tag: v1.1" [ref=e320] [cursor=pointer]':
+              - generic [ref=e321]:
+                - generic [ref=e323]:
+                  - img [ref=e325]
+                  - generic [ref=e328]:
+                    - generic [ref=e329]: "Tag:"
+                    - generic [ref=e330]: v1.1
+                - generic:
+                  - img
+            - status [ref=e332]:
+              - generic [ref=e333]: Loading
+              - text: Loading tag information…
+          - generic [ref=e334]:
+            - generic [ref=e335]:
+              - heading "Release title" [level=2] [ref=e336]
+              - textbox "Enter release title" [ref=e337]:
+                - /placeholder: Title
+                - text: v1.1 - 修复卡死 + 实时速度 + 取消按钮
+            - heading "Release notes" [level=2] [ref=e338]
+            - paragraph [ref=e339]: Select a previous tag to create generated release notes
+          - button "Generate release notes" [disabled] [ref=e342]:
+            - generic [ref=e344]: Generate release notes
+          - generic [ref=e346]:
+            - generic [ref=e347]: Release description
+            - generic [ref=e348]:
+              - generic [ref=e349]:
+                - tablist "Add a comment" [ref=e350]:
+                  - tab "Write" [selected] [ref=e351] [cursor=pointer]
+                  - tab "Preview" [ref=e352] [cursor=pointer]
+                - toolbar [ref=e353]:
+                  - generic [ref=e354]:
+                    - button "Heading" [ref=e356] [cursor=pointer]:
+                      - img
+                    - button "Bold" [ref=e358] [cursor=pointer]:
+                      - img
+                    - button "Italic" [ref=e360] [cursor=pointer]:
+                      - img
+                    - button "Quote" [ref=e362] [cursor=pointer]:
+                      - img
+                    - button "Code" [ref=e364] [cursor=pointer]:
+                      - img
+                    - button "Link" [ref=e366] [cursor=pointer]:
+                      - img
+                    - separator [ref=e367]
+                    - button "Numbered list" [ref=e369] [cursor=pointer]:
+                      - img
+                    - button "Unordered list" [ref=e371] [cursor=pointer]:
+                      - img
+                    - button "Task list" [ref=e373] [cursor=pointer]:
+                      - img
+                    - separator [ref=e374]
+                    - button "Attach files" [ref=e376] [cursor=pointer]:
+                      - img
+                    - button "Mention" [ref=e378] [cursor=pointer]:
+                      - img
+                    - button "Reference" [ref=e380] [cursor=pointer]:
+                      - img
+                    - button "Saved replies" [ref=e382] [cursor=pointer]:
+                      - img
+              - tabpanel "Write" [ref=e383]:
+                - textbox "Release description" [ref=e387]:
+                  - /placeholder: " "
+                  - text: "## 更新内容 - 修复「修改位置」时界面卡死无响应的问题：总大小统计改为后台线程计算，对话框立即弹出 - 进度对话框改为显示**实时传输速度**（而非平均速度），速度曲线按固定间隔采样、自动缩放 - 新增「取消」按钮：迁移/修改到一半可安全中止并回滚，原始文件保持不变 - 进度条在统计阶段进入不确定模式，拿到真实总量后切回确定模式 - 现同时提供 **64 位 (x64)**、**32 位 (x86)** 与 **Linux (x86_64)** 版本 ## 系统要求 - Windows 10/11（64 位或 32 位均可） - Linux（x86_64，glibc 2.17+，常见桌面发行版均可） - Windows 下需要管理员权限或开启「开发者模式」才能创建符号链接；Linux 下普通用户即可（部分只读/网络文件系统除外） ## 使用说明 - Windows：以管理员身份运行（或开启开发者模式），选择文件/文件夹与目标位置开始迁移 - Linux：终端执行 `chmod +x LinkShift-v1.1-Linux-x86_64` 后运行 `./LinkShift-v1.1-Linux-x86_64`（需要 libxcb、libgl 等 Qt 运行库，桌面发行版通常已自带） - 迁移：选择文件/文件夹与目标位置，开始迁移 - 修改位置：针对已迁移（符号链接）的项，把真实数据移动到新位置 - 过程中可观察实时速度曲线；如需中断，点击「取消」即可安全回滚 ## 构建说明 - 64 位 Windows 版本使用 PySide6（LGPL） - 32 位 Windows 版本使用 PyQt5（GPL），因为 PySide6 无 32 位 wheel - Linux 版本使用 PyQt5（GPL），通过 GitHub Actions CI 在 ubuntu-22.04 自动打包"
+                - generic [ref=e388]:
+                  - link "Markdown is supported" [ref=e390] [cursor=pointer]:
+                    - /url: https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax
+                    - generic [ref=e391]:
+                      - generic:
+                        - img
+                      - generic [ref=e392]: Markdown is supported
+                  - button "Paste, drop, or click to add files" [ref=e393] [cursor=pointer]:
+                    - generic [ref=e394]:
+                      - generic:
+                        - img
+                      - generic [ref=e395]: Paste, drop, or click to add files
+          - heading "Assets" [level=2] [ref=e396]
+          - list [ref=e397]:
+            - listitem [ref=e398]:
+              - generic [ref=e399]:
+                - button "Remove attached binary LinkShift-v1.1-Linux-x86_64" [ref=e401] [cursor=pointer]:
+                  - img
+                - generic [ref=e402]:
+                  - textbox "Change this file’s name" [ref=e403]: LinkShift-v1.1-Linux-x86_64
+                  - text: (59.5 MB)
+            - listitem [ref=e404]:
+              - generic [ref=e405]:
+                - button "Remove attached binary LinkShift-v1.1-Windows-x64.exe" [ref=e407] [cursor=pointer]:
+                  - img
+                - generic [ref=e408]:
+                  - textbox "Change this file’s name" [ref=e409]: LinkShift-v1.1-Windows-x64.exe
+                  - text: (48.2 MB)
+            - listitem [ref=e410]:
+              - generic [ref=e411]:
+                - button "Remove attached binary LinkShift-v1.1-Windows-x86.exe" [ref=e413] [cursor=pointer]:
+                  - img
+                - generic [ref=e414]:
+                  - textbox "Change this file’s name" [ref=e415]: LinkShift-v1.1-Windows-x86.exe
+                  - text: (29.7 MB)
+          - generic [ref=e416]:
+            - button [ref=e417]
+            - button "Attach binaries by dropping them here or selecting them" [ref=e418] [cursor=pointer]:
+              - generic [ref=e419]:
+                - generic:
+                  - img
+                  - text: Attach binaries by dropping them here or selecting them.
+            - alert [ref=e420]
+          - group "Release label" [ref=e422]:
+            - generic [ref=e423]: Release label
+            - generic [ref=e425]:
+              - radio "None" [ref=e426]
+              - text: None
+            - generic [ref=e427]:
+              - generic [ref=e428]:
+                - radio "Pre-release" [ref=e429]
+                - text: Pre-release
+              - generic [ref=e430]: Label release as non-production ready
+            - generic [ref=e431]:
+              - generic [ref=e432]:
+                - radio "Latest" [checked] [ref=e433]
+                - text: Latest
+              - generic [ref=e434]: Label release as the latest for this repository
+          - separator [ref=e435]
+          - button "Update release" [ref=e436] [cursor=pointer]
+        - generic [ref=e437]:
+          - text: Tagging suggestions
+          - paragraph [ref=e438]:
+            - text: It’s common practice to prefix your version names with the letter
+            - code [ref=e439]: v
+            - text: . Some good tag names might be
+            - code [ref=e440]: v1.0.0
+            - text: or
+            - code [ref=e441]: v2.3.4
+            - text: .
+          - paragraph [ref=e442]:
+            - text: If the tag isn’t meant for production use, add a pre-release version after the version name. Some good pre-release versions might be
+            - code [ref=e443]: v0.2.0-alpha
+            - text: or
+            - code [ref=e444]: v5.9-beta.3
+            - text: .
+          - text: Semantic versioning
+          - paragraph [ref=e445]:
+            - text: If you’re new to releasing software, we highly recommend to
+            - link "learn more about semantic versioning." [ref=e446] [cursor=pointer]:
+              - /url: http://semver.org/
+          - paragraph [ref=e447]: A newly published release will automatically be labeled as the latest release for this repository.
+          - paragraph [ref=e448]:
+            - text: If 'Set as the latest release' is unchecked, the latest release will be determined by higher semantic version and creation date.
+            - link "Learn more about release settings." [ref=e449] [cursor=pointer]:
+              - /url: https://docs.github.com/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+  - contentinfo [ref=e269]:
+    - heading "Footer" [level=2] [ref=e270]
+    - generic [ref=e271]:
+      - generic [ref=e272]:
+        - link "GitHub Homepage" [ref=e273] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e274]
+        - generic [ref=e276]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e277]:
+        - heading "Footer navigation" [level=3] [ref=e278]
+        - list "Footer navigation" [ref=e279]:
+          - listitem [ref=e280]:
+            - link "Terms" [ref=e281] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e282]:
+            - link "Privacy" [ref=e283] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e284]:
+            - link "Security" [ref=e285] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e286]:
+            - link "Status" [ref=e287] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e288]:
+            - link "Community" [ref=e289] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e290]:
+            - link "Docs" [ref=e291] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e292]:
+            - link "Contact" [ref=e293] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e294]:
+            - button "Manage cookies" [ref=e296] [cursor=pointer]
+          - listitem [ref=e297]:
+            - button "Do not share my personal information" [ref=e299] [cursor=pointer]

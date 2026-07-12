@@ -71,15 +71,21 @@ def is_admin() -> bool:
         return False
 
 
-def relaunch_as_admin() -> None:
-    """以管理员身份重新启动当前 Python 程序（仅 Windows 有效）。"""
+def relaunch_as_admin() -> bool:
+    """以管理员身份重新启动当前 Python 程序（仅 Windows 有效）。
+
+    返回 True 表示已成功请求提权重启，调用方应立即退出当前进程；
+    返回 False 表示用户拒绝 UAC 或启动失败。
+    """
     if sys.platform != "win32":
-        return  # 非 Windows 无此需求
+        return False
     args = " ".join(f'"{a}"' for a in sys.argv)
     exe = sys.executable
-    ctypes.windll.shell32.ShellExecuteW(
+    ret = ctypes.windll.shell32.ShellExecuteW(
         None, "runas", exe, args, None, 1
     )
+    # ShellExecuteW 返回值 > 32 表示成功
+    return ret > 32
 
 
 def create_symlink(target: str, link: str, target_is_directory: bool = False) -> None:

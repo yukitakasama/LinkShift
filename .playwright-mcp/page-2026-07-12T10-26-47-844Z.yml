@@ -1,0 +1,243 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global navigation menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "yukitakasama" [ref=e22] [cursor=pointer]:
+                  - /url: /yukitakasama
+                  - generic [ref=e23]: yukitakasama
+              - listitem [ref=e24]:
+                - link "LinkShift" [ref=e25] [cursor=pointer]:
+                  - /url: /yukitakasama/LinkShift
+                - button "Switch repository (alt shift r)" [ref=e26] [cursor=pointer]:
+                  - img [ref=e27]
+          - button "Search or jump to…" [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]:
+              - generic:
+                - img
+              - generic [ref=e33]:
+                - generic:
+                  - text: Type
+                  - generic: /
+                  - text: to search
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e38]:
+              - link "Chat with Copilot" [ref=e40] [cursor=pointer]:
+                - /url: /copilot
+                - img [ref=e41]
+              - button "Open Copilot…" [ref=e45] [cursor=pointer]:
+                - generic:
+                  - img
+            - button "Create new..." [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - generic [ref=e49]:
+              - link "All issues" [ref=e50] [cursor=pointer]:
+                - /url: /issues
+                - img [ref=e51]
+              - link "All pull requests" [ref=e54] [cursor=pointer]:
+                - /url: /pulls
+                - img [ref=e55]
+              - link "All repositories" [ref=e57] [cursor=pointer]:
+                - /url: /repos
+                - img [ref=e58]
+          - link "You have no unread notifications (g then n)" [ref=e60] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e61]
+          - button "Open user navigation menu" [ref=e64] [cursor=pointer]:
+            - img "User avatar" [ref=e65]
+      - heading "Repository navigation" [level=2] [ref=e66]
+      - navigation "Repository" [ref=e67]:
+        - list [ref=e68]:
+          - listitem [ref=e69]:
+            - link "Code" [ref=e70] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift
+              - generic [ref=e71]: Code
+          - listitem [ref=e72]:
+            - link "Issues" [ref=e73] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/issues
+              - generic [ref=e74]: Issues
+          - listitem [ref=e75]:
+            - link "Pull requests" [ref=e76] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/pulls
+              - generic [ref=e77]: Pull requests
+          - listitem [ref=e78]:
+            - link "Agents" [ref=e79] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/agents?author=yukitakasama
+              - generic [ref=e80]: Agents
+          - listitem [ref=e81]:
+            - link "Actions" [ref=e82] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/actions
+              - generic [ref=e83]: Actions
+          - listitem [ref=e84]:
+            - link "Projects" [ref=e85] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/projects
+              - generic [ref=e86]: Projects
+          - listitem [ref=e87]:
+            - link "Wiki" [ref=e88] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/wiki
+              - generic [ref=e89]: Wiki
+          - listitem [ref=e90]:
+            - link "Security and quality" [ref=e91] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/security
+              - generic [ref=e92]: Security and quality
+          - listitem [ref=e93]:
+            - link "Insights" [ref=e94] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/pulse
+              - generic [ref=e95]: Insights
+          - listitem [ref=e96]:
+            - link "Settings" [ref=e97] [cursor=pointer]:
+              - /url: /yukitakasama/LinkShift/settings
+              - generic [ref=e98]: Settings
+  - main [ref=e102]:
+    - generic [ref=e334]:
+      - generic [ref=e337]:
+        - link "Build Linux" [ref=e340] [cursor=pointer]:
+          - /url: /yukitakasama/LinkShift/actions/workflows/build.yml
+          - img [ref=e341]
+          - generic [ref=e343]: Build Linux
+        - generic [ref=e344]:
+          - generic [ref=e345]:
+            - img "completed successfully:" [ref=e349]
+            - 'heading "fix: include a.scripts in EXE() — was missing entry script, caused al… #4" [level=1] [ref=e351]':
+              - generic [ref=e352]: "fix: include a.scripts in EXE() — was missing entry script, caused al… #4"
+          - generic [ref=e354]:
+            - button "Re-run all jobs" [ref=e356] [cursor=pointer]:
+              - generic [ref=e358]: Re-run all jobs
+            - button "Workflow run options" [ref=e362] [cursor=pointer]:
+              - img
+      - generic [ref=e363]:
+        - navigation "Workflow run" [ref=e369]:
+          - list [ref=e370]:
+            - listitem [ref=e371]:
+              - link "Summary" [ref=e372] [cursor=pointer]:
+                - /url: /yukitakasama/LinkShift/actions/runs/29188876791
+                - generic:
+                  - img
+                - generic [ref=e374]: Summary
+            - generic [ref=e375]:
+              - heading "All jobs" [level=4] [ref=e376]
+              - button "Filter by job status" [ref=e377] [cursor=pointer]:
+                - img [ref=e378]
+            - listitem [ref=e380]
+            - listitem [ref=e381]:
+              - list [ref=e382]:
+                - listitem [ref=e383]:
+                  - link "linux" [ref=e384] [cursor=pointer]:
+                    - /url: /yukitakasama/LinkShift/actions/runs/29188876791/job/86639917799
+                    - generic:
+                      - img
+                    - generic [ref=e386]: linux
+            - listitem [ref=e387]
+            - listitem [ref=e388]:
+              - heading "Run details" [level=3] [ref=e390]
+              - list "Run details" [ref=e391]:
+                - listitem [ref=e392]:
+                  - link "Usage" [ref=e393] [cursor=pointer]:
+                    - /url: /yukitakasama/LinkShift/actions/runs/29188876791/usage
+                    - generic:
+                      - img
+                    - generic [ref=e395]: Usage
+                - listitem [ref=e396]:
+                  - link "Workflow file" [ref=e397] [cursor=pointer]:
+                    - /url: /yukitakasama/LinkShift/actions/runs/29188876791/workflow
+                    - generic:
+                      - img
+                    - generic [ref=e399]: Workflow file
+        - generic [ref=e401]:
+          - region "Workflow run summary" [ref=e402]:
+            - generic [ref=e403]:
+              - generic [ref=e404]:
+                - generic [ref=e405]: Triggered via push July 12, 2026 18:179 minutes ago
+                - generic [ref=e406]:
+                  - link "@yukitakasama yukitakasama" [ref=e407] [cursor=pointer]:
+                    - /url: /yukitakasama
+                    - img "@yukitakasama" [ref=e408]
+                    - text: yukitakasama
+                  - generic [ref=e409]:
+                    - generic [ref=e410]: pushed
+                    - link "10b0722" [ref=e411] [cursor=pointer]:
+                      - /url: /yukitakasama/LinkShift/commit/10b072234aa026f7f5a440a5ca70bcc654782728
+                      - img [ref=e412]
+                      - text: 10b0722
+                  - link "main" [ref=e414] [cursor=pointer]:
+                    - /url: /yukitakasama/LinkShift/tree/refs/heads/main
+              - generic [ref=e415]:
+                - generic [ref=e416]: Status
+                - text: Success
+              - generic [ref=e417]:
+                - generic [ref=e418]: Total duration
+                - link "1m 29s" [ref=e419] [cursor=pointer]:
+                  - /url: /yukitakasama/LinkShift/actions/runs/29188876791/usage
+              - generic [ref=e420]:
+                - generic [ref=e421]: Artifacts
+                - text: –
+          - region "Workflow run graph" [ref=e422]:
+            - generic [ref=e424]:
+              - generic [ref=e426]:
+                - heading "build.yml" [level=2] [ref=e427]:
+                  - link "build.yml" [ref=e428] [cursor=pointer]:
+                    - /url: /yukitakasama/LinkShift/actions/runs/29188876791/workflow
+                - generic [ref=e429]: "on: push"
+              - generic [ref=e431]:
+                - generic [ref=e432]:
+                  - img
+                  - img
+                  - 'link "completed successfully: linux 1m 26s" [ref=e436] [cursor=pointer]':
+                    - /url: /yukitakasama/LinkShift/actions/runs/29188876791/job/86639917799
+                    - generic [ref=e438]:
+                      - img "completed successfully:" [ref=e440]
+                      - generic [ref=e443]: linux
+                      - generic [ref=e444]: 1m 26s
+                - generic [ref=e445]:
+                  - paragraph [ref=e446]: Oh hello! Nice to see you.
+                  - paragraph [ref=e447]:
+                    - text: Made with ❤️ by
+                    - link [ref=e448] [cursor=pointer]:
+                      - /url: https://actions.github.io/humans.txt
+                      - text: humans.txt
+              - generic [ref=e449]:
+                - button "Fit to window" [disabled] [ref=e450]:
+                  - img
+                - generic [ref=e451]:
+                  - button "Zoom out" [disabled] [ref=e453]:
+                    - img
+                  - button "Zoom in" [disabled] [ref=e455]:
+                    - img
+          - img [ref=e456]
+          - region "Annotations" [ref=e457]:
+            - generic [ref=e458]:
+              - generic [ref=e460]:
+                - heading "Annotations" [level=2] [ref=e461]
+                - generic [ref=e462]: 1 warning
+              - table [ref=e463]:
+                - rowgroup [ref=e464]:
+                  - 'row "linux Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, softprops/action-gh-release@v2. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ Show more" [ref=e465]':
+                    - 'cell "linux Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, softprops/action-gh-release@v2. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ Show more" [ref=e466]':
+                      - generic [ref=e467]:
+                        - img [ref=e469]
+                        - generic [ref=e471]:
+                          - link "linux" [ref=e472] [cursor=pointer]:
+                            - /url: /yukitakasama/LinkShift/actions/runs/29188876791/job/86639917799#step:19:2
+                            - strong [ref=e473]: linux
+                          - generic [ref=e474]:
+                            - generic [ref=e476]:
+                              - text: "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, softprops/action-gh-release@v2. For more information see:"
+                              - link "https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/" [ref=e477] [cursor=pointer]:
+                                - /url: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+                            - button "Show more" [ref=e478] [cursor=pointer]

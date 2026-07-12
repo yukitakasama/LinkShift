@@ -35,18 +35,6 @@ class MainWindow(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(tabs)
 
-    # ---------------- 能力检测 ----------------
-    def _check_capability(self):
-        """运行时检查（仅作提示，不再弹提权对话框）。"""
-        if not symlink.can_create_symlink():
-            if symlink.is_admin():
-                QMessageBox.warning(
-                    self, "符号链接不可用",
-                    "当前环境无法创建符号链接（即使是管理员）。\n"
-                    "请确认系统策略允许，或启用「开发者模式」。",
-                )
-            # 非管理员且无权限时不再弹提权对话框（启动时已处理）
-
     # ================= 迁移页 =================
     def _build_migrate_tab(self) -> QWidget:
         tab = QWidget()
