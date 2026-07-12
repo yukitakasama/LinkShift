@@ -11,6 +11,7 @@ import sys
 from .qt_compat import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QLabel,
     QLineEdit, QFileDialog, QMessageBox, QAbstractItemView, QTabWidget, Qt,
+    QTableWidget, QTableWidgetItem, QHeaderView, QProgressBar, QApplication,
 )
 
 from core import disk, symlink, migrator
@@ -29,6 +30,7 @@ class MainWindow(QWidget):
         tabs = QTabWidget()
         tabs.addTab(self._build_migrate_tab(), "迁移")
         tabs.addTab(self._build_relocate_tab(), "修改位置")
+        tabs.addTab(self._build_records_tab(), "迁移记录")
 
         layout = QVBoxLayout(self)
         layout.addWidget(tabs)
@@ -51,7 +53,8 @@ class MainWindow(QWidget):
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 )
                 if ans == QMessageBox.StandardButton.Yes:
-                    symlink.relaunch_as_admin()
+                    if symlink.relaunch_as_admin():
+                        QApplication.instance().quit()
 
     # ================= 迁移页 =================
     def _build_migrate_tab(self) -> QWidget:
@@ -316,3 +319,164 @@ class MainWindow(QWidget):
         dlg.start_migration()
         dlg.exec()
         self._update_rel_current(link)
+
+    # ================= 迁移记录页 =================
+    def _build_records_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+
+        tip = QLabel(
+            "扫描指定目录（及子目录）下的所有符号链接，显示链接路径与其指向的真实位置。\n"
+            "可用于查看、复制或导出已迁移项目的对应关系。"
+        )
+        tip.setWordWrap(True)
+        layout.addWidget(tip)
+
+        # 扫描目录选择
+        scan_row = QHBoxLayout()
+        self.records_scan_edit = QLineEdit()
+        self.records_scan_edit.setPlaceholderText("选择要扫描的根目录…")
+        self.btn_records_scan = QPushButton("选择目录")
+        self.btn_records_refresh = QPushButton("刷新 / 扫描")
+        self.btn_records_refresh.setMinimumHeight(36)
+        scan_row.addWidget(self.records_scan_edit, stretch=1)
+        scan_row.addWidget(self.btn_records_scan)
+        scan_row.addWidget(self.btn_records_refresh)
+        layout.addLayout(scan_row)
+
+        # 结果表格
+        from .qt_compat import QTableWidget, QTableWidgetItem, QHeaderView
+        self.records_table = QTableWidget()
+        self.records_table.setColumnCount(3)
+        self.records_table.setHorizontalHeaderLabels(["符号链接路径", "指向目标", "状态"])
+        self.records_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.records_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.records_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.records_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.records_table.setSelectionMode(QTableWidget.SelectionMode.ExtendedSelection)
+        self.records_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.records_table.setAlternatingRowColors(True)
+        layout.addWidget(self.records_table, stretch=1)
+
+        # 底部按钮
+        btn_row = QHBoxLayout()
+        self.btn_records_copy = QPushButton("复制选中行")
+        self.btn_records_export = QPushButton("导出为 CSV")
+        self.btn_records_open_link = QPushButton("打开链接所在文件夹")
+        self.btn_records_open_target = QPushButton("打开目标文件夹")
+        btn_row.addWidget(self.btn_records_copy)
+        btn_row.addWidget(self.btn_records_export)
+        btn_row.addStretch()
+        btn_row.addWidget(self.btn_records_open_link)
+        btn_row.addWidget(self.btn_records_open_target)
+        layout.addLayout(btn_row)
+
+        self.btn_records_scan.clicked.connect(self._choose_records_dir)
+        self.btn_records_refresh.clicked.connect(self._scan_records)
+        self.btn_records_copy.clicked.connect(self._copy_records)
+        self.btn_records_export.clicked.connect(self._export_records)
+        self.btn_records_open_link.clicked.connect(lambda: self._open_selected_folder("link"))
+        self.btn_records_open_target.clicked.connect(lambda: self._open_selected_folder("target"))
+
+        return tab
+
+    def _choose_records_dir(self):
+        folder = QFileDialog.getExistingDirectory(self, "选择扫描根目录")
+        if folder:
+            self.records_scan_edit.setText(os.path.abspath(os.path.realpath(folder)))
+
+    def _scan_records(self):
+        root = self.records_scan_edit.text().strip()
+        if not root:
+            QMessageBox.information(self, "提示", "请先选择扫描根目录。")
+            return
+        if not os.path.isdir(root):
+            QMessageBox.information(self, "提示", "扫描根目录无效。")
+            return
+
+        self.records_table.setRowCount(0)
+        self._records_data = []
+
+        # 递归查找所有符号链接
+        links_found = 0
+        for dirpath, dirnames, filenames in os.walk(root):
+            # 检查目录中的文件
+            for name in filenames + dirnames:
+                full = os.path.join(dirpath, name)
+                if os.path.islink(full):
+                    try:
+                        target = os.path.realpath(full)
+                    except OSError:
+                        target = "（无法解析）"
+                    exists = os.path.exists(target) if target != "（无法解析）" else False
+                    status = "正常" if exists else "目标丢失"
+                    self._records_data.append((full, target, status))
+                    links_found += 1
+
+        # 填充表格
+        self.records_table.setRowCount(len(self._records_data))
+        for row, (link, target, status) in enumerate(self._records_data):
+            item_link = QTableWidgetItem(link)
+            item_target = QTableWidgetItem(target)
+            item_status = QTableWidgetItem(status)
+            if status == "目标丢失":
+                item_status.setForeground(Qt.GlobalColor.red)
+            self.records_table.setItem(row, 0, item_link)
+            self.records_table.setItem(row, 1, item_target)
+            self.records_table.setItem(row, 2, item_status)
+
+        QMessageBox.information(self, "扫描完成", f"共扫描到 {links_found} 个符号链接。")
+
+    def _copy_records(self):
+        selected = self.records_table.selectedItems()
+        if not selected:
+            QMessageBox.information(self, "提示", "请先选择要复制的行。")
+            return
+        # 按行分组
+        rows = sorted(set(item.row() for item in selected))
+        lines = []
+        for row in rows:
+            link = self.records_table.item(row, 0).text()
+            target = self.records_table.item(row, 1).text()
+            status = self.records_table.item(row, 2).text()
+            lines.append(f"{link}\t{target}\t{status}")
+        QApplication.clipboard().setText("\n".join(lines))
+        QMessageBox.information(self, "完成", f"已复制 {len(rows)} 行到剪贴板。")
+
+    def _export_records(self):
+        if not self._records_data:
+            QMessageBox.information(self, "提示", "没有数据可导出，请先扫描。")
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "导出 CSV", "迁移记录.csv", "CSV 文件 (*.csv)")
+        if not path:
+            return
+        try:
+            import csv
+            with open(path, "w", encoding="utf-8-sig", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["符号链接路径", "指向目标", "状态"])
+                for link, target, status in self._records_data:
+                    writer.writerow([link, target, status])
+            QMessageBox.information(self, "完成", f"已导出到：\n{path}")
+        except Exception as e:
+            QMessageBox.critical(self, "导出失败", str(e))
+
+    def _open_selected_folder(self, mode: str):
+        selected = self.records_table.selectedItems()
+        if not selected:
+            QMessageBox.information(self, "提示", "请先选择一行。")
+            return
+        row = selected[0].row()
+        path = self.records_table.item(row, 0 if mode == "link" else 1).text()
+        if mode == "target" and (path == "（无法解析）" or not os.path.exists(path)):
+            QMessageBox.information(self, "提示", "目标路径不存在或无法解析。")
+            return
+        folder = os.path.dirname(path) if os.path.isfile(path) or not os.path.exists(path) else path
+        if os.path.exists(folder):
+            import subprocess, sys
+            if sys.platform == "win32":
+                subprocess.run(["explorer", folder], check=False)
+            else:
+                subprocess.run(["xdg-open", folder], check=False)
+        else:
+            QMessageBox.information(self, "提示", "文件夹不存在。")

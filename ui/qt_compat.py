@@ -18,6 +18,7 @@ if TOOLKIT is None:
             QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
             QListWidget, QLabel, QLineEdit, QFileDialog, QMessageBox,
             QAbstractItemView, QTabWidget, QDialog, QProgressBar, QTextEdit,
+            QTableWidget, QTableWidgetItem, QHeaderView,
         )
         from PySide6.QtGui import QIcon, QPainter, QPen, QColor
         TOOLKIT = "PySide6"
@@ -30,6 +31,7 @@ if TOOLKIT is None:
         QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
         QListWidget, QLabel, QLineEdit, QFileDialog, QMessageBox,
         QAbstractItemView, QTabWidget, QDialog, QProgressBar, QTextEdit,
+        QTableWidget, QTableWidgetItem, QHeaderView,
     )
     from PyQt5.QtGui import QIcon, QPainter, QPen, QColor
     TOOLKIT = "PyQt5"
