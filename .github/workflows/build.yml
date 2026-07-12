@@ -3,6 +3,7 @@ name: Build Linux
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -31,8 +32,6 @@ jobs:
             libxcb-shape0 libxcb-util1
 
       - name: Install Python dependencies
-        # Linux 构建使用 PyQt5：manylinux wheel 稳定且 qt_compat 已兼容；
-        # PySide6 6.11 的 manylinux_2_34 wheel 在当前 runner 上 import 失败。
         run: |
           python -m pip install --upgrade pip
           pip install "PyQt5>=5.15" pyinstaller
@@ -51,14 +50,14 @@ jobs:
       - name: Prepare artifact
         run: |
           mkdir -p out
-          TAG=$(git tag --points-at HEAD | head -1 || echo "v1.2")
+          TAG="${{ github.ref_name }}"
           cp dist/LinkShift "out/LinkShift-${TAG}-Linux-x86_64"
           chmod +x "out/LinkShift-${TAG}-Linux-x86_64"
           file "out/LinkShift-${TAG}-Linux-x86_64"
 
       - name: Upload to release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.2
           files: out/LinkShift-*.x86_64
           fail_on_unmatched_files: false
