@@ -47,16 +47,21 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: pyinstaller build.spec --noconfirm
 
-      - name: Prepare artifact
+      - name: Package artifacts
         run: |
           mkdir -p out
           TAG="${{ github.ref_name }}"
-          cp dist/LinkShift "out/LinkShift-${TAG}-Linux-x86_64"
-          chmod +x "out/LinkShift-${TAG}-Linux-x86_64"
-          file "out/LinkShift-${TAG}-Linux-x86_64"
+          BINARY="LinkShift-${TAG}-Linux-x86_64"
+          cp dist/LinkShift "out/${BINARY}"
+          chmod +x "out/${BINARY}"
+          file "out/${BINARY}"
+          # Create tar.gz archive
+          cp "out/${BINARY}" "${BINARY}"
+          tar czf "out/${BINARY}.tar.gz" "${BINARY}"
+          rm -f "${BINARY}"
 
       - name: Upload to release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" out/LinkShift-*-Linux-x86_64 --clobber
+        run: gh release upload "${{ github.ref_name }}" out/LinkShift-* --clobber
