@@ -6,9 +6,9 @@ import sys
 import tempfile
 import traceback
 
-from ui.qt_compat import QApplication, QIcon
+from ui.qt_compat import QApplication, QIcon, QMessageBox
 
-from ui import MainWindow
+from core import symlink
 
 
 def _resource(rel: str) -> str:
@@ -34,6 +34,36 @@ def _fatal(title: str, text: str) -> None:
     sys.exit(1)
 
 
+def _check_admin_before_gui(app: QApplication) -> bool:
+    """在显示 GUI 前检查符号链接能力，必要时提示提权。
+    返回 True 表示继续启动 GUI，False 表示已请求提权并应退出当前进程。
+    """
+    if symlink.can_create_symlink():
+        return True
+    if symlink.is_admin():
+        # 已是管理员但仍无法创建，仅警告
+        QMessageBox.warning(
+            None, "符号链接不可用",
+            "当前环境无法创建符号链接（即使是管理员）。\n"
+            "请确认系统策略允许，或启用「开发者模式」。\n\n"
+            "程序仍可启动，但迁移功能将无法使用。"
+        )
+        return True
+    # 非管理员且无权限，询问是否提权重启
+    ans = QMessageBox.question(
+        None, "需要管理员权限",
+        "创建符号链接需要管理员权限或「开发者模式」。\n\n"
+        "是否以管理员身份重新启动本程序？\n"
+        "（也可在 Windows 设置 → 开发者模式 中开启后继续使用。）\n\n"
+        "选择「否」将以普通权限启动，迁移功能不可用。",
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+    )
+    if ans == QMessageBox.StandardButton.Yes:
+        if symlink.relaunch_as_admin():
+            return False  # 已请求提权，退出当前进程
+    return True  # 用户拒绝提权，继续以普通权限启动
+
+
 def main():
     try:
         app = QApplication(sys.argv)
@@ -51,14 +81,15 @@ def main():
     except Exception:
         pass
 
+    # 先检查权限，再决定是否显示主窗口
+    if not _check_admin_before_gui(app):
+        return  # 已请求管理员重启，退出当前进程
+
     try:
+        from ui import MainWindow
         window = MainWindow()
         window.setWindowIcon(QIcon(_resource("app_icon.ico")))
         window.show()
-        try:
-            window._check_capability()
-        except Exception:
-            pass
         sys.exit(app.exec())
     except Exception:
         _crash_log(traceback.format_exc())

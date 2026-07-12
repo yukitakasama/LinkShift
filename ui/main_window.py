@@ -37,6 +37,7 @@ class MainWindow(QWidget):
 
     # ---------------- 能力检测 ----------------
     def _check_capability(self):
+        """运行时检查（仅作提示，不再弹提权对话框）。"""
         if not symlink.can_create_symlink():
             if symlink.is_admin():
                 QMessageBox.warning(
@@ -44,17 +45,7 @@ class MainWindow(QWidget):
                     "当前环境无法创建符号链接（即使是管理员）。\n"
                     "请确认系统策略允许，或启用「开发者模式」。",
                 )
-            else:
-                ans = QMessageBox.question(
-                    self, "需要管理员权限",
-                    "创建符号链接需要管理员权限或「开发者模式」。\n\n"
-                    "是否以管理员身份重新启动本程序？\n"
-                    "（也可在 Windows 设置 → 开发者模式 中开启后继续使用。）",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                )
-                if ans == QMessageBox.StandardButton.Yes:
-                    if symlink.relaunch_as_admin():
-                        QApplication.instance().quit()
+            # 非管理员且无权限时不再弹提权对话框（启动时已处理）
 
     # ================= 迁移页 =================
     def _build_migrate_tab(self) -> QWidget:
