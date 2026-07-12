@@ -58,7 +58,13 @@ def can_create_symlink() -> bool:
 
 
 def is_admin() -> bool:
-    """判断当前进程是否以管理员身份运行。"""
+    """判断当前进程是否具备创建符号链接所需权限。
+
+    Windows 下需要管理员或「开发者模式」；Linux/Posix 普通用户即可创建，
+    因此非 Windows 一律返回 True（视为具备能力）。
+    """
+    if sys.platform != "win32":
+        return True
     try:
         return bool(ctypes.windll.shell32.IsUserAnAdmin())
     except Exception:
@@ -67,8 +73,8 @@ def is_admin() -> bool:
 
 def relaunch_as_admin() -> None:
     """以管理员身份重新启动当前 Python 程序（仅 Windows 有效）。"""
-    import ctypes
-
+    if sys.platform != "win32":
+        return  # 非 Windows 无此需求
     args = " ".join(f'"{a}"' for a in sys.argv)
     exe = sys.executable
     ctypes.windll.shell32.ShellExecuteW(
@@ -90,6 +96,10 @@ def create_symlink(target: str, link: str, target_is_directory: bool = False) ->
         return
     except (OSError, NotImplementedError):
         pass
+
+    if sys.platform != "win32":
+        # 非 Windows 下 os.symlink 即应成功；失败直接抛出
+        raise OSError(f"无法创建符号链接：{link} -> {target}")
 
     # 回退到 Win32 API
     _kernel32 = ctypes.windll.kernel32

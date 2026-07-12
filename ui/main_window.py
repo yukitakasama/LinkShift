@@ -6,6 +6,7 @@
 """
 
 import os
+import sys
 
 from .qt_compat import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QLabel,
