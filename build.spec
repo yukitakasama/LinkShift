@@ -50,6 +50,8 @@ _exe_kwargs = dict(
 if sys.platform == "win32":
     _exe_kwargs["icon"] = "app_icon.ico"
 
+pyz = PYZ(a.pure)
+
 exe = EXE(
     pyz,
     a.binaries,
