@@ -5,6 +5,11 @@ on:
     branches: [main]
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to upload to (e.g. v1.2)'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -61,7 +66,8 @@ jobs:
           rm -f "${BINARY}"
 
       - name: Upload to release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" out/LinkShift-* --clobber
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+        run: gh release upload "$TAG" out/LinkShift-* --clobber
