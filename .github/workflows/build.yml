@@ -51,13 +51,14 @@ jobs:
       - name: Prepare artifact
         run: |
           mkdir -p out
-          cp dist/LinkShift out/LinkShift-v1.1-Linux-x86_64
-          chmod +x out/LinkShift-v1.1-Linux-x86_64
-          file out/LinkShift-v1.1-Linux-x86_64
+          TAG=$(git tag --points-at HEAD | head -1 || echo "v1.2")
+          cp dist/LinkShift "out/LinkShift-${TAG}-Linux-x86_64"
+          chmod +x "out/LinkShift-${TAG}-Linux-x86_64"
+          file "out/LinkShift-${TAG}-Linux-x86_64"
 
-      - name: Upload to release v1.1
+      - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1
-          files: out/LinkShift-v1.1-Linux-x86_64
+          tag_name: v1.2
+          files: out/LinkShift-*.x86_64
           fail_on_unmatched_files: false
