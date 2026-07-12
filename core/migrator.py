@@ -22,6 +22,10 @@ from . import disk as disk_mod
 CHUNK_SIZE = 1 * 1024 * 1024  # 1 MB 分块复制，便于统计速度与进度
 
 
+class Cancelled(Exception):
+    """迁移/修改过程中被用户取消。"""
+
+
 def _iter_files(src: str):
     """递归产出源目录下所有文件路径（相对目录根）。"""
     for root, _dirs, files in os.walk(src):
@@ -61,17 +65,23 @@ def _unique_dest(dest_dir: str, name: str) -> str:
 
 
 def _copy_with_progress(src_file: str, dst_file: str, counters: dict,
-                         on_progress, on_speed) -> None:
-    """复制单个文件并实时统计进度/速度。"""
+                          on_progress, on_speed, should_cancel) -> None:
+    """复制单个文件并实时统计进度/速度。
+
+    should_cancel 为可调用对象，返回 True 时中止复制并抛出 Cancelled。
+    """
     try:
         size = os.path.getsize(src_file)
     except OSError:
         size = 0
     os.makedirs(os.path.dirname(dst_file), exist_ok=True)
     last_report = time.monotonic()
+    last_done = counters["done"]
     with open(src_file, "rb") as fin, open(dst_file, "wb") as fout:
         copied = 0
         while True:
+            if should_cancel():
+                raise Cancelled()
             chunk = fin.read(CHUNK_SIZE)
             if not chunk:
                 break
@@ -82,10 +92,12 @@ def _copy_with_progress(src_file: str, dst_file: str, counters: dict,
             now = time.monotonic()
             if now - last_report >= 0.2:
                 elapsed_total = now - counters["start"]
-                overall = counters["done"] / elapsed_total if elapsed_total > 0 else 0
+                interval = now - last_report
+                inst = (counters["done"] - last_done) / interval if interval > 0 else 0
                 on_progress(counters["done"], counters["total"])
-                on_speed(overall, elapsed_total)
+                on_speed(inst, elapsed_total)
                 last_report = now
+                last_done = counters["done"]
     # 保持元数据（时间戳等）
     try:
         shutil.copystat(src_file, dst_file)
@@ -115,11 +127,13 @@ def _restore_from_target(target: str, src: str, is_dir: bool) -> None:
 
 
 def _move_item(src: str, dest_dir: str, counters: dict,
-               on_progress, on_speed, on_item_start, on_log) -> bool:
+                on_progress, on_speed, on_item_start, on_log,
+                should_cancel) -> bool:
     """迁移单个源项（文件或文件夹）。
 
     流程：复制（带进度且校验完整性）-> 删除原始源 -> 在原位置建符号链接
     -> 校验链接。若建链接失败，则从目标把数据还原回原位置，保证原路径不失效。
+    复制阶段被取消时，清理半拷贝目标并保留原始源不动，返回 False。
     """
     name = os.path.basename(src.rstrip("\\/")) or src
     is_dir = os.path.isdir(src)
@@ -129,13 +143,28 @@ def _move_item(src: str, dest_dir: str, counters: dict,
     on_item_start(name)
 
     # 1) 复制（带进度）
-    if is_dir:
-        for rel in _iter_files(src):
-            s = os.path.join(src, rel)
-            d = os.path.join(target, rel)
-            _copy_with_progress(s, d, counters, on_progress, on_speed)
-    else:
-        _copy_with_progress(src, target, counters, on_progress, on_speed)
+    try:
+        if is_dir:
+            for rel in _iter_files(src):
+                if should_cancel():
+                    raise Cancelled()
+                s = os.path.join(src, rel)
+                d = os.path.join(target, rel)
+                _copy_with_progress(s, d, counters, on_progress, on_speed,
+                                    should_cancel)
+        else:
+            _copy_with_progress(src, target, counters, on_progress, on_speed,
+                                should_cancel)
+    except Cancelled:
+        on_log(f"已取消：清理半拷贝目标并保留原始文件 {name}")
+        try:
+            if is_dir:
+                shutil.rmtree(target, ignore_errors=True)
+            else:
+                os.remove(target)
+        except OSError:
+            pass
+        return False
 
     # 2) 校验复制完整性（大小一致）
     if total_size(target) != src_size:
@@ -188,7 +217,8 @@ def _move_item(src: str, dest_dir: str, counters: dict,
 def migrate(sources: list, dest_dir: str, callbacks: dict) -> dict:
     """执行整体迁移。
 
-    callbacks 可包含：on_progress, on_speed, on_item_start, on_log, on_finished, on_error
+    callbacks 可包含：on_progress, on_speed, on_item_start, on_log,
+    on_finished, on_error, on_cancelled, on_total, should_cancel
     """
     def cb(name, default=None):
         return callbacks.get(name, lambda *a, **k: None)
@@ -199,8 +229,13 @@ def migrate(sources: list, dest_dir: str, callbacks: dict) -> dict:
     on_log = cb("on_log")
     on_finished = cb("on_finished")
     on_error = cb("on_error")
+    on_cancelled = cb("on_cancelled")
+    on_total = cb("on_total")
+    should_cancel = cb("should_cancel", default=lambda: False)
 
+    on_log("正在计算总大小…")
     total = sum(total_size(s) for s in sources)
+    on_total(total)
     counters = {
         "done": 0,
         "total": total,
@@ -210,17 +245,24 @@ def migrate(sources: list, dest_dir: str, callbacks: dict) -> dict:
 
     success = 0
     errors = 0
+    aborted = False
     for src in sources:
+        if should_cancel():
+            aborted = True
+            break
         if not os.path.exists(src):
             on_log(f"跳过（不存在）：{src}")
             errors += 1
             continue
         try:
             if _move_item(src, dest_dir, counters, on_progress, on_speed,
-                          on_item_start, on_log):
+                          on_item_start, on_log, should_cancel):
                 success += 1
             else:
                 errors += 1
+        except Cancelled:
+            aborted = True
+            break
         except Exception as e:
             on_error(f"迁移失败：{src} ({e})")
             errors += 1
@@ -230,8 +272,11 @@ def migrate(sources: list, dest_dir: str, callbacks: dict) -> dict:
     elapsed = time.monotonic() - counters["start"]
     overall = counters["done"] / elapsed if elapsed > 0 else 0
     on_speed(overall, elapsed)
-    on_finished(success, errors)
-    return {"success": success, "errors": errors,
+    if aborted:
+        on_cancelled(success, errors)
+    else:
+        on_finished(success, errors)
+    return {"success": success, "errors": errors, "aborted": aborted,
             "done_bytes": counters["done"], "total_bytes": total}
 
 
@@ -267,6 +312,9 @@ def relocate(symlink_path: str, new_dest_dir: str, callbacks: dict) -> dict:
     on_log = cb("on_log")
     on_finished = cb("on_finished")
     on_error = cb("on_error")
+    on_cancelled = cb("on_cancelled")
+    on_total = cb("on_total")
+    should_cancel = cb("should_cancel", default=lambda: False)
 
     def _fail(msg):
         on_error(msg)
@@ -287,7 +335,9 @@ def relocate(symlink_path: str, new_dest_dir: str, callbacks: dict) -> dict:
     name = os.path.basename(symlink_path.rstrip("\\/")) or symlink_path
     new_target = _unique_dest(new_dest_dir, name)
 
+    on_log("正在计算总大小…")
     total = total_size(current_target)
+    on_total(total)
     counters = {
         "done": 0,
         "total": total,
@@ -301,12 +351,27 @@ def relocate(symlink_path: str, new_dest_dir: str, callbacks: dict) -> dict:
     try:
         if is_dir:
             for rel in _iter_files(current_target):
+                if should_cancel():
+                    raise Cancelled()
                 s = os.path.join(current_target, rel)
                 d = os.path.join(new_target, rel)
-                _copy_with_progress(s, d, counters, on_progress, on_speed)
+                _copy_with_progress(s, d, counters, on_progress, on_speed,
+                                    should_cancel)
         else:
             _copy_with_progress(current_target, new_target, counters,
-                                on_progress, on_speed)
+                                on_progress, on_speed, should_cancel)
+    except Cancelled:
+        on_log("已取消：清理半拷贝目标，原始数据保持不动")
+        try:
+            if is_dir:
+                shutil.rmtree(new_target, ignore_errors=True)
+            else:
+                os.remove(new_target)
+        except OSError:
+            pass
+        on_cancelled(0, 0)
+        return {"success": 0, "errors": 0, "aborted": True,
+                "done_bytes": counters["done"], "total_bytes": total}
     except Exception as e:
         on_log(f"复制过程中出错：{e}")
         try:

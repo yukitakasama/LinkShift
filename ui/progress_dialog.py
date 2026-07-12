@@ -1,4 +1,4 @@
-"""迁移进度对话框：进度条 + 实时速度曲线 + 日志。"""
+"""迁移进度对话框：进度条 + 实时速度曲线 + 日志 + 取消按钮。"""
 
 import time
 
@@ -17,11 +17,17 @@ class _Worker(QThread):
     item_start = Signal(str)
     log = Signal(str)
     finished = Signal(int, int)          # success, errors
+    cancelled = Signal(int, int)         # success, errors
     error = Signal(str)
+    total = Signal(int)                  # total_bytes
 
     def __init__(self, task):
         super().__init__()
         self.task = task
+        self._cancel = False
+
+    def request_cancel(self):
+        self._cancel = True
 
     def run(self):
         callbacks = {
@@ -30,7 +36,10 @@ class _Worker(QThread):
             "on_item_start": lambda n: self.item_start.emit(n),
             "on_log": lambda m: self.log.emit(m),
             "on_finished": lambda s, e: self.finished.emit(s, e),
+            "on_cancelled": lambda s, e: self.cancelled.emit(s, e),
             "on_error": lambda m: self.error.emit(m),
+            "on_total": lambda t: self.total.emit(t),
+            "should_cancel": lambda: self._cancel,
         }
         self.task(callbacks)
 
@@ -56,16 +65,19 @@ class ProgressDialog(QDialog):
         self.setWindowTitle(title)
         self.setMinimumWidth(560)
         self.setModal(True)
-        self._total = total_bytes or 1
+        self._total = total_bytes or 0
+        self._has_total = total_bytes > 0
 
         # 状态标签
         self.lbl_current = QLabel("准备中…")
-        self.lbl_overall = QLabel("总进度：0%")
+        self.lbl_overall = QLabel("总进度：计算中…")
         self.lbl_speed = QLabel("速度：—")
         self.lbl_time = QLabel("用时：0.0s")
 
         self.bar = QProgressBar()
         self.bar.setValue(0)
+        if not self._has_total:
+            self.bar.setRange(0, 0)  # 不确定模式，直到拿到真实总量
 
         # 速度曲线
         self.series = QLineSeries()
@@ -76,7 +88,7 @@ class ProgressDialog(QDialog):
 
         self.chart = QChart()
         self.chart.addSeries(self.series)
-        self.chart.setTitle("迁移速度 (MB/s)")
+        self.chart.setTitle("实时传输速度 (MB/s)")
         self.chart.setAnimationOptions(QChart.AnimationOption.NoAnimation)
         self.chart.legend().hide()
 
@@ -103,6 +115,8 @@ class ProgressDialog(QDialog):
         self.log_edit.setReadOnly(True)
         self.log_edit.setMaximumHeight(140)
 
+        self.btn_cancel = QPushButton("取消")
+        self.btn_cancel.clicked.connect(self._on_cancel_clicked)
         self.btn_close = QPushButton("关闭")
         self.btn_close.setEnabled(False)
         self.btn_close.clicked.connect(self.accept)
@@ -118,10 +132,15 @@ class ProgressDialog(QDialog):
         layout.addWidget(self.chart_view)
         layout.addWidget(QLabel("日志："))
         layout.addWidget(self.log_edit)
-        layout.addWidget(self.btn_close, alignment=Qt.AlignmentFlag.AlignRight)
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        btn_row.addWidget(self.btn_cancel)
+        btn_row.addWidget(self.btn_close)
+        layout.addLayout(btn_row)
 
         self._start_time = 0
         self._samples = []  # (t, mbps)
+        self._cancelling = False
 
         self.worker = _Worker(task)
         self.worker.progress.connect(self._on_progress)
@@ -130,18 +149,41 @@ class ProgressDialog(QDialog):
             lambda n: self.lbl_current.setText(f"正在处理：{n}"))
         self.worker.log.connect(self._on_log)
         self.worker.finished.connect(self._on_finished)
+        self.worker.cancelled.connect(self._on_cancelled)
         self.worker.error.connect(lambda m: self._on_log(f"[错误] {m}"))
+        self.worker.total.connect(self._on_total)
 
     def start_migration(self):
         self._start_time = time.monotonic()
         self.worker.start()
 
+    # ---- 取消 ----
+    def _on_cancel_clicked(self):
+        if self._cancelling:
+            return
+        self._cancelling = True
+        self.btn_cancel.setEnabled(False)
+        self.lbl_current.setText("正在取消…（请稍候，正在安全回滚）")
+        self.worker.request_cancel()
+
     # ---- 信号处理 ----
+    def _on_total(self, total):
+        self._total = total or 1
+        self._has_total = True
+        self.bar.setRange(0, self._total)
+        if self.bar.value() > self._total:
+            self.bar.setValue(self._total)
+
     def _on_progress(self, done, total):
-        total = total or self._total or 1
-        pct = int(done / total * 100)
+        if total and total > 0:
+            self._total = total
+        if not self._has_total:
+            self.bar.setRange(0, self._total)
+            self._has_total = True
+        pct = int(done / (self._total or 1) * 100)
         self.bar.setValue(min(pct, 100))
-        self.lbl_overall.setText(f"总进度：{pct}%  ({_fmt_size(done)} / {_fmt_size(total)})")
+        self.lbl_overall.setText(
+            f"总进度：{pct}%  ({_fmt_size(done)} / {_fmt_size(self._total)})")
 
     def _on_speed(self, bps, elapsed):
         mbps = bps / (1024 * 1024)
@@ -169,8 +211,19 @@ class ProgressDialog(QDialog):
 
     def _on_finished(self, success, errors):
         self.lbl_current.setText("迁移完成")
-        self.bar.setValue(100)
+        if self._has_total:
+            self.bar.setValue(self._total)
         self._on_log(f"—— 完成：成功 {success} 项，失败 {errors} 项 ——")
         if errors:
             QMessageBox.warning(self, "迁移结束", f"完成，但有 {errors} 项出现问题，请查看日志。")
+        self.btn_cancel.setEnabled(False)
+        self.btn_close.setEnabled(True)
+
+    def _on_cancelled(self, success, errors):
+        self.lbl_current.setText("已取消")
+        if self._has_total:
+            self.bar.setValue(min(self.bar.value(), self._total))
+        self._on_log(f"—— 已取消：已完成 {success} 项，未处理 {errors} 项 ——")
+        self._on_log("（已安全回滚，原始文件保持不变）")
+        self.btn_cancel.setEnabled(False)
         self.btn_close.setEnabled(True)

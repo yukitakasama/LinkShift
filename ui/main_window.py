@@ -182,8 +182,7 @@ class MainWindow(QWidget):
         def task(callbacks):
             migrator.migrate(srcs, d, callbacks)
 
-        total = sum(migrator.total_size(s) for s in srcs) or 1
-        dlg = ProgressDialog(task, total_bytes=total, title="迁移进行中", parent=self)
+        dlg = ProgressDialog(task, total_bytes=0, title="迁移进行中", parent=self)
         dlg.show()
         dlg.start_migration()
         dlg.exec()
@@ -316,8 +315,7 @@ class MainWindow(QWidget):
         def task(callbacks):
             migrator.relocate(link, dest, callbacks)
 
-        total = migrator.total_size(current_target) or 1
-        dlg = ProgressDialog(task, total_bytes=total, title="修改位置进行中", parent=self)
+        dlg = ProgressDialog(task, total_bytes=0, title="修改位置进行中", parent=self)
         dlg.show()
         dlg.start_migration()
         dlg.exec()
